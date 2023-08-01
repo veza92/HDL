@@ -25,24 +25,47 @@ module shift_8x64_taps(clk, shift, sr_in, sr_out, sr_tap_one, sr_tap_two, sr_tap
 endmodule
 
 # TestBench Code
-module shift_8x64_taps_tb;
-  wire sr_tap_one, sr_tap_two, sr_tap_three, sr_out;
-  reg clk, shift, sr_in;
+// Testbench
+module test;
+
+  reg clk;
+  reg shift;
+  reg [7:0] sr_in;;
+  wire [7:0] sr_tap_one;
+  wire [7:0] sr_tap_two;
+  wire [7:0]sr_tap_three;
+  wire [7:0] sr_out;
   
-  initial
-    begin
-      clk = 1'b0; shift = 1'b0; sr_in = 1'b0;
-      #10 clk = 1'b0; shift = 1'b1; sr_in = 1'b1;
-      #20 clk = 1'b1; shift = 1'b0; sr_in = 1'b0;
-      #30 clk = 1'b1; shift = 1'b1; sr_in = 1'b1;
-    end
-  initial
+  // Instantiate design under test
+  shift_8x64_taps test(clk, shift, sr_in, 
+                  sr_out, sr_tap_one, sr_tap_two, sr_tap_three); 
+          
+  initial begin
+    // Dump waves
+    $dumpfile("dump.vcd");
+    $dumpvars(1);
+    
+    $display("shift.");
+    clk = 0;
+    shift = 1;
+    sr_in = 1'bx;
+    display;
+    
+    $display("Release shift.");
+    sr_in = 1;
+    shift = 0;
+    display;
+
+    $display("Toggle clk.");
+    clk = 1;
+    display;
+    
+  end
   
-    $monitor($time, "clk=%shift shift=%sr_in sr_in = %sr_in, sr_out = %sr_in, sr_tap_one = %sr_in,   sr_tap_two = %sr_in, sr_tap_three = %sr_in", clk, shift, sr_in, sr_out, sr_tap_one, sr_tap_two, sr_tap_three);
-  initial
-    begin
-      $dumpfile("dump.vcd"); $dumpvars(1);
-    end
-  
+  task display;
+    #1 $display("shift:%0h, sr_in:%0h, sr_out:%0h, sr_tap_one:%0h,   sr_tap_two:%0h, sr_tap_three:%0h",
+      shift, sr_in, sr_out, sr_tap_one, sr_tap_two, sr_tap_three);
+  endtask
+
 endmodule
 
